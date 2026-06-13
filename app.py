@@ -13,7 +13,7 @@ if "headlines" not in st.session_state:
 
 API_KEY = "b61505ca88c943769025ebf5c8687ec0"
 
-# 🔊 Speech function
+#  Speech function
 def speak_news(headlines):
     engine = pyttsx3.init('sapi5')
     engine.setProperty('rate', 150)
@@ -26,7 +26,7 @@ def speak_news(headlines):
 
     engine.runAndWait()
 
-# 🔥 FORM
+#  FORM
 with st.form("news_form"):
     category = st.selectbox(
         "Select News Category",
@@ -37,7 +37,7 @@ with st.form("news_form"):
 
     submit = st.form_submit_button("Get News")
 
-# 🔹 Fetch News
+#  Fetch News
 if submit:
     url = f"https://newsapi.org/v2/everything?q={category}&language=en&sortBy=publishedAt&apiKey={API_KEY}"
 
@@ -46,10 +46,10 @@ if submit:
 
     articles = data.get("articles", [])
 
-    # ✅ Store FULL articles (not just title)
+    #  Store FULL articles (not just title)
     st.session_state.headlines = articles[:num_news]
 
-# 🔹 Display News
+#  Display News
 if st.session_state.headlines:
     st.subheader("Latest Headlines")
 
@@ -61,7 +61,7 @@ if st.session_state.headlines:
         st.write(f"{i+1}. {title}")
         st.caption(f"Source: {source} | Date: {date}")
 
-# 🔹 Play News
+#  Play News
 if st.button("Play News"):
     if st.session_state.headlines:
         threading.Thread(
