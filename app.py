@@ -1,72 +1,99 @@
-import streamlit as st
+from flask import Flask, render_template, request, session
 import requests
 import pyttsx3
-
-
 import threading
 
-st.title("News Headline Reader")
-
-# Session state
-if "headlines" not in st.session_state:
-    st.session_state.headlines = []
+app = Flask(__name__)
+app.secret_key = "news_reader_secret"
 
 API_KEY = "b61505ca88c943769025ebf5c8687ec0"
 
-#  Speech function
+latest_headlines = []
+
+
+# Text to Speech
 def speak_news(headlines):
-    engine = pyttsx3.init('sapi5')
-    engine.setProperty('rate', 150)
-    engine.setProperty('volume', 1.0)
 
-    engine.say("Here are the latest news headlines")
+    for title in headlines:
 
-    for article in headlines:
-        engine.say(article['title'])
+        if title:
 
-    engine.runAndWait()
+            print("Speaking:", title)
 
-#  FORM
-with st.form("news_form"):
-    category = st.selectbox(
-        "Select News Category",
-        ["general", "technology", "sports", "business", "health"]
+            engine = pyttsx3.init('sapi5')
+            engine.setProperty('rate', 140)
+            engine.setProperty('volume', 1.0)
+
+            engine.say(title)
+            engine.runAndWait()
+
+            engine.stop()
+
+
+# Home page
+@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
+def home():
+
+    articles = []
+
+    if request.method == "POST":
+
+        category = request.form["category"]
+        number = int(request.form["num_news"])
+
+        url = (
+            f"https://newsapi.org/v2/everything?"
+            f"q={category}&language=en&sortBy=publishedAt&apiKey={API_KEY}"
+        )
+
+        response = requests.get(url)
+
+        data = response.json()
+
+        articles = data.get("articles", [])[:number]
+
+
+        session["headlines"] = [
+            article["title"].replace("...", "").strip()
+            for article in articles
+            if article.get("title")
+        ]
+
+
+    return render_template(
+        "index.html",
+        headlines=articles
     )
 
-    num_news = st.slider("Select number of news headlines", 1, 10, 5)
 
-    submit = st.form_submit_button("Get News")
 
-#  Fetch News
-if submit:
-    url = f"https://newsapi.org/v2/everything?q={category}&language=en&sortBy=publishedAt&apiKey={API_KEY}"
 
-    response = requests.get(url)
-    data = response.json()
+# Play News
+@app.route("/play")
+def play():
 
-    articles = data.get("articles", [])
+    headlines = session.get("headlines", [])
 
-    #  Store FULL articles (not just title)
-    st.session_state.headlines = articles[:num_news]
+    if headlines:
 
-#  Display News
-if st.session_state.headlines:
-    st.subheader("Latest Headlines")
-
-    for i, article in enumerate(st.session_state.headlines):
-        title = article['title']
-        source = article['source']['name']
-        date = article['publishedAt'][:10]
-
-        st.write(f"{i+1}. {title}")
-        st.caption(f"Source: {source} | Date: {date}")
-
-#  Play News
-if st.button("Play News"):
-    if st.session_state.headlines:
         threading.Thread(
             target=speak_news,
-            args=(st.session_state.headlines,)
+            args=(headlines,)
         ).start()
-    else:
-        st.warning("Please fetch news first!")
+
+    return render_template(
+        "index.html",
+        headlines=[
+            {
+                "title": title,
+                "source": {"name": ""},
+                "publishedAt": ""
+            }
+            for title in headlines
+        ]
+    )
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
