@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>News Headline Reader</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<header>
+
+<h1>📰 News Headline Reader</h1>
+
+<p>
+Stay updated with latest news and listen using Text-To-Speech
+</p>
+
+</header>
+
+
+
+<div class="form-box">
+
+
+<form method="POST">
+
+
+<label>Select Category</label>
+
+
+<select name="category">
+
+<option value="technology">Technology</option>
+
+<option value="business">Business</option>
+
+<option value="sports">Sports</option>
+
+<option value="health">Health</option>
+
+<option value="general">General</option>
+
+</select>
+
+
+
+<label>Number of News</label>
+
+
+<input 
+type="number"
+name="num_news"
+value="5"
+min="1"
+max="10"
+>
+
+
+
+<button>
+Get Latest News
+</button>
+
+
+</form>
+
+
+</div>
+
+
+
+{% if headlines %}
+
+
+<h2>Latest Headlines</h2>
+
+
+
+<div class="news-container">
+
+
+{% for article in headlines %}
+
+
+<div class="card">
+
+
+{% if article.urlToImage %}
+
+<img src="{{article.urlToImage}}">
+
+{% endif %}
+
+
+
+<h3>
+{{article.title}}
+</h3>
+
+
+<p class="source">
+
+Source:
+{{article.source.name}}
+
+</p>
+
+
+<p class="date">
+
+{{article.publishedAt[:10]}}
+
+</p>
+
+
+<a href="{{article.url}}" target="_blank">
+
+Read More
+
+</a>
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+</div>
+
+
+
+<form action="/play" method="GET">
+
+<button class="play">
+🔊 Play News
+</button>
+
+</form>python <app class="py"></app>
+
+
+{% endif %}
+
+
+
+<footer>
+
+<p>
+Built using Python • Flask • NewsAPI • Text-To-Speech
+</p>
+
+</footer>
+
+
+
+</div>
+
+
+</body>
+
+</html>
