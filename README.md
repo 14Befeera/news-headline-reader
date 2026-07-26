@@ -41,6 +41,5 @@ People often find it difficult to stay updated with the latest news because read
 5. Text-to-Speech converts the headlines into audio.
 6. Users can listen to the latest news updates.
 
-## 📂 Project Structure
 
 
